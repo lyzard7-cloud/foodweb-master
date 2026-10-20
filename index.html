@@ -40,21 +40,31 @@
     .instruction strong { color:#07795f; }
     .board { position:relative; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; border-radius:19px; overflow:hidden; isolation:isolate; padding:17px; min-height:505px; background: radial-gradient(circle at 14% 18%,rgba(255,255,255,.86) 0%,transparent 31%), radial-gradient(circle at 88% 76%,rgba(246,255,229,.9) 0%,transparent 32%), linear-gradient(155deg,#e9f6ec,#f3fae9 56%,#e6f4e2); border:1px solid #d7e9da; }
     .board::after { content:""; pointer-events:none; position:absolute; inset:0; background-image:radial-gradient(#96bb9c 1px,transparent 1px); background-size:27px 27px; opacity:.12; z-index:0; }
-    .arrows { position:absolute; inset:0; width:100%; height:100%; z-index:1; overflow:visible; pointer-events:none; }
+    /* 화살표는 카드 사이의 통로로 우회하고, 끝점만 카드의 테두리에 닿습니다. */
+    .arrows { position:absolute; inset:0; width:100%; height:100%; z-index:3; overflow:hidden; pointer-events:none; }
+
     .species { min-width:0; min-height:137px; background:rgba(255,255,255,.96); border:2px solid #d9e9de; border-radius:17px; color:var(--ink); position:relative; z-index:2; display:flex; flex-direction:column; gap:5px; align-items:center; justify-content:center; padding:8px 4px; box-shadow:0 3px 0 rgba(79,127,87,.07),0 8px 16px rgba(38,107,70,.04); transition:border .18s, transform .2s, box-shadow .2s, opacity .2s; }
     .species:hover { border-color:#8ecdad; transform:translateY(-1px); }
     .species.selected { border-color:#0a9272; background:#edfff4; box-shadow:0 0 0 4px rgba(17,157,117,.18),0 8px 23px rgba(28,147,102,.1); transform:translateY(-2px); }
     .species.related { border-color:#b7d6bb; }
+    .species.selected .tag { color:#08775d; }
+
     .species.wrong { animation:shake .3s linear; border-color:#d66565; }
     .species.hint-pulse { animation:hintpulse 1.25s ease-in-out 2; }
     .species .emoji { font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif; display:block; font-size:clamp(38px,5.5vw,58px); line-height:1.15; filter:drop-shadow(0 5px 3px rgba(22,67,49,.09)); }
     .species .name { text-align:center; font-size:clamp(12px,2.4vw,17px); font-weight:850; letter-spacing:-.065em; word-break:keep-all; line-height:1.3; }
     .species .tag { color:#599381; font-size:10px; font-weight:700; }
     .species .tag.done { background:#e3f5e8; color:#14715b; border-radius:30px; padding:2px 7px; }
-    .link { fill:none; stroke:#179a75; stroke-width:3.8; stroke-linecap:round; stroke-linejoin:round; opacity:.76; filter:drop-shadow(0 1px 1px rgba(255,255,255,.9)); transition:opacity .25s, stroke .25s; }
-    .link.faded { opacity:.16; stroke:#93bda7; }
-    .link.strong { opacity:1; stroke:#08775d; stroke-width:4.8; }
-    .link.just-added { stroke-dasharray:800; stroke-dashoffset:800; animation:draw .55s ease-out forwards; }
+    /* 흰색 테두리와 진한 화살표: 풀 배경과 복잡한 연결에서도 선이 구분됩니다. */
+    .link-halo, .link { fill:none; stroke-linecap:round; stroke-linejoin:round; transition:opacity .2s, stroke .2s; }
+    .link-halo { stroke:#fff; stroke-width:8; opacity:.95; }
+    .link { stroke:#0b8a65; stroke-width:3.5; opacity:.9; }
+    .link-halo.faded { opacity:.09; }
+    .link.faded { opacity:.12; stroke:#729c89; }
+    .link-halo.strong { stroke-width:10; opacity:1; }
+    .link.strong { opacity:1; stroke:#066b50; stroke-width:5; }
+    .link.just-added, .link-halo.just-added { stroke-dasharray:2400; stroke-dashoffset:2400; animation:draw .55s ease-out forwards; }
+    .board:has(.species.selected) .species:not(.selected) { box-shadow:0 3px 0 rgba(79,127,87,.07); }
     .notification { display:flex; align-items:center; gap:9px; margin:14px 0 2px; min-height:44px; padding:10px 13px; font-size:13px; color:#507568; background:#f8fcf9; border:1px solid #e7efe8; border-radius:12px; font-weight:650; line-height:1.5; }
     .notification.success { color:#0b7359; background:#effaf2; border-color:#c5ead2; }
     .notification.error { color:#a64141; background:#fff5f2; border-color:#f3d0c9; }
@@ -91,18 +101,20 @@
       .btn { min-height:45px; padding:8px 5px; font-size:12px; gap:4px; }
       .instruction { padding:10px; margin:14px 0 12px; }
       .instruction p { font-size:12px; }
-      .board { gap:10px; padding:11px; min-height:390px; border-radius:14px; }
+      .board { gap:16px; padding:11px; min-height:390px; border-radius:14px; }
       .species { min-height:111px; border-radius:13px; padding:4px 2px; }
       .species .emoji { font-size:41px; }
       .species .name { font-size:12px; }
       .species .tag { font-size:9px; }
-      .link { stroke-width:3; }
+      .link { stroke-width:3.2; }
+      .link.strong { stroke-width:4.4; }
+      .link-halo { stroke-width:7; }
       .guide { font-size:11px; }
     }
     @media (max-width:360px) {
       .controls { grid-template-columns:1fr 1fr; }
       #hintBtn { grid-column:span 2; }
-      .board { gap:7px; padding:8px; min-height:365px; }
+      .board { gap:13px; padding:8px; min-height:365px; }
       .species { min-height:106px; }
       .species .emoji { font-size:35px; }
       .species .name { font-size:11px; }
@@ -146,7 +158,7 @@
         <svg class="arrows" id="arrowLayer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
       </div>
       <div class="notification" id="feedback" role="status" aria-live="polite">🧩 같은 생태계의 생물들이 등장합니다. 정답 관계를 하나씩 연결해 보세요.</div>
-      <div class="guide"><b>화살표의 방향:</b> 먹이가 되는 생물 → 이를 먹는 생물<br>생물은 총 26종의 목록에서 매번 새로 선정됩니다. 각 문제는 수업용으로 단순화한 대표적인 먹이 관계를 기준으로 합니다.</div>
+      <div class="guide"><b>화살표의 방향:</b> 먹이가 되는 생물 → 이를 먹는 생물<br><b>연결선 보기:</b> 생물을 터치하면 그 생물과 연결된 선이 진하게 강조됩니다. 완성한 뒤에도 카드를 터치해 관계를 살펴볼 수 있어요.<br>생물은 총 26종의 목록에서 매번 새로 선정됩니다. 각 문제는 수업용으로 단순화한 대표적인 먹이 관계를 기준으로 합니다.</div>
     </section>
     <p class="bottom">별도의 로그인이나 설치 없이 사용할 수 있는 수업용 게임 · 새로고침하면 새로운 문제가 출제됩니다.</p>
   </main>
@@ -220,6 +232,7 @@
   let highlightedHint = [];
   let lastAdded = null;
   let startedAt = 0;
+  let routeCache = null;
 
   function shuffled(items) {
     const arr = [...items];
@@ -298,6 +311,7 @@
   }
   function escapeHtml(str) { return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
   function renderBoard() {
+    routeCache=null;
     board.querySelectorAll('.species').forEach(node=>node.remove());
     for (const s of round.cards) {
       const btn=document.createElement('button');
@@ -332,7 +346,13 @@
     notify('↻ 같은 생물 9종으로 다시 시작합니다.');
   }
   function onSpeciesClick(id) {
-    if (discovered.size===round.edges.length) return;
+    // 완성 뒤에도 개별 생물의 먹이 관계를 확대해 볼 수 있습니다.
+    if (discovered.size===round.edges.length) {
+      selectedId=selectedId===id?null:id;
+      updateSelection();
+      notify(selectedId ? `🔎 ${byId.get(id).name}에 연결된 화살표만 선명하게 표시했습니다. 같은 카드를 한 번 더 누르면 전체가 보입니다.` : '🌿 먹이그물 전체 화살표를 다시 표시합니다.');
+      return;
+    }
     clearHint();
     if (!selectedId) {
       selectedId=id; notify(`👆 ${byId.get(id).name}을(를) 먹는 생물을 선택하세요.`); updateSelection(); return;
@@ -378,46 +398,190 @@
     selectedId=null;
     updateSelection();
   }
-  function edgePoints(a,b) {
+  /*
+   * 3×3 카드 사이의 세로/가로 통로를 그래프로 만들어 최단 우회 경로를 찾습니다.
+   * 카드 중앙을 가로지르지 않고 각 카드 바깥 가장자리에서 출발/도착합니다.
+   * 같은 통로의 중복 사용에는 비용을 주어 가능한 범위에서 분산 배치합니다.
+   */
+  function routeLayout() {
     const boardRect=board.getBoundingClientRect();
-    const r1=a.getBoundingClientRect(), r2=b.getBoundingClientRect();
-    const p1={x:r1.left-boardRect.left+r1.width/2,y:r1.top-boardRect.top+r1.height/2};
-    const p2={x:r2.left-boardRect.left+r2.width/2,y:r2.top-boardRect.top+r2.height/2};
-    const dx=p2.x-p1.x, dy=p2.y-p1.y;
-    const fit=(w,h)=>Math.min((w/2+3)/Math.max(Math.abs(dx),.01),(h/2+3)/Math.max(Math.abs(dy),.01));
-    const t1=fit(r1.width,r1.height), t2=fit(r2.width,r2.height);
-    return {x1:p1.x+dx*t1,y1:p1.y+dy*t1,x2:p2.x-dx*t2,y2:p2.y-dy*t2};
+    const boxes=new Map();
+    round.cards.forEach((card,index)=>{
+      const r=board.querySelector(`[data-id="${card.id}"]`).getBoundingClientRect();
+      boxes.set(card.id,{
+        id:card.id, row:Math.floor(index/3),col:index%3,
+        left:r.left-boardRect.left,top:r.top-boardRect.top,
+        right:r.right-boardRect.left,bottom:r.bottom-boardRect.top,
+        cx:(r.left+r.right)/2-boardRect.left,cy:(r.top+r.bottom)/2-boardRect.top
+      });
+    });
+    const boxArr=[...boxes.values()];
+    const metric=boxArr.map(b=>[b.left,b.top,b.right,b.bottom].map(n=>Math.round(n*4)/4).join(',')).join('|');
+    const sizeKey=`${Math.round(boardRect.width*4)}:${Math.round(boardRect.height*4)}:${metric}`;
+    if (routeCache && routeCache.sizeKey===sizeKey) return routeCache.routes;
+
+    const at=(row,col)=>boxArr[row*3+col];
+    const xs=[at(0,0).left/2,
+      (at(0,0).right+at(0,1).left)/2,
+      (at(0,1).right+at(0,2).left)/2,
+      (at(0,2).right+boardRect.width)/2];
+    const ys=[at(0,0).top/2,
+      (at(0,0).bottom+at(1,0).top)/2,
+      (at(1,0).bottom+at(2,0).top)/2,
+      (at(2,0).bottom+boardRect.height)/2];
+    const n=(yi,xi)=>yi*4+xi;
+    const nodes=Array.from({length:16},(_,i)=>({x:xs[i%4],y:ys[Math.floor(i/4)]}));
+    const graph=Array.from({length:16},()=>[]);
+    const edgeName=(a,b)=>`${Math.min(a,b)}-${Math.max(a,b)}`;
+    for(let row=0;row<4;row++) for(let col=0;col<4;col++) {
+      if(col<3) {
+        const a=n(row,col),b=n(row,col+1),length=xs[col+1]-xs[col];
+        graph[a].push({id:b,length});graph[b].push({id:a,length});
+      }
+      if(row<3) {
+        const a=n(row,col),b=n(row+1,col),length=ys[row+1]-ys[row];
+        graph[a].push({id:b,length});graph[b].push({id:a,length});
+      }
+    }
+    const ports=box=>[
+      {side:'left',start:{x:box.left-2,y:box.cy},access:{x:xs[box.col],y:box.cy},neighbors:[n(box.row,box.col),n(box.row+1,box.col)]},
+      {side:'right',start:{x:box.right+2,y:box.cy},access:{x:xs[box.col+1],y:box.cy},neighbors:[n(box.row,box.col+1),n(box.row+1,box.col+1)]},
+      {side:'top',start:{x:box.cx,y:box.top-2},access:{x:box.cx,y:ys[box.row]},neighbors:[n(box.row,box.col),n(box.row,box.col+1)]},
+      {side:'bottom',start:{x:box.cx,y:box.bottom+2},access:{x:box.cx,y:ys[box.row+1]},neighbors:[n(box.row+1,box.col),n(box.row+1,box.col+1)]}
+    ];
+    const distance=(p,q)=>Math.abs(p.x-q.x)+Math.abs(p.y-q.y);
+    const used=new Map();
+    const routes=new Map();
+    // 동일 통로가 겹칠 가능성을 줄이도록 먼저 가까운 먹이 관계부터 배치합니다.
+    const ordered=[...round.edges].sort((a,b)=>{
+      const p=boxes.get(a.from),q=boxes.get(a.to),r=boxes.get(b.from),t=boxes.get(b.to);
+      return distance(p,q)-distance(r,t) || `${a.from}>${a.to}`.localeCompare(`${b.from}>${b.to}`);
+    });
+    function dijkstra(start,end) {
+      const startKey=`${start}:start`;
+      const best=new Map([[startKey,{cost:0,ids:[start],direction:'start'}]]);
+      const queue=[{id:start,direction:'start',cost:0,ids:[start]}];
+      let found=null;
+      while(queue.length) {
+        queue.sort((a,b)=>a.cost-b.cost);
+        const cur=queue.shift(),stateKey=`${cur.id}:${cur.direction}`;
+        if(cur.cost>(best.get(stateKey)?.cost??Infinity)+.01) continue;
+        if(cur.id===end) {found=cur;break;}
+        for(const link of graph[cur.id]) {
+          const dir=(link.id%4===cur.id%4)?'v':'h';
+          const segment=edgeName(cur.id,link.id);
+          const basePenalty=(used.get(segment)||0)*Math.min(24,link.length*.23);
+          const bendPenalty=cur.direction!=='start'&&cur.direction!==dir?7:0;
+          const alt=cur.cost+link.length+basePenalty+bendPenalty;
+          const id=`${link.id}:${dir}`;
+          if(alt<(best.get(id)?.cost??Infinity)-.01) {
+            const next={id:link.id,direction:dir,cost:alt,ids:[...cur.ids,link.id]};
+            best.set(id,next);queue.push(next);
+          }
+        }
+      }
+      return found;
+    }
+    for (const e of ordered) {
+      const from=boxes.get(e.from),to=boxes.get(e.to);
+      let winner=null;
+      // 서로 마주 보는 인접한 카드의 관계는 짧고 직관적인 직선으로 표시합니다.
+      if(from.row===to.row && Math.abs(from.col-to.col)===1) {
+        const right=from.col<to.col,first=right?from:to,second=right?to:from;
+        const y=(first.cy+second.cy)/2;
+        const pts=right?[{x:first.right+2,y},{x:second.left-2,y}]:[{x:second.left-2,y},{x:first.right+2,y}];
+        winner={points:pts,cost:distance(pts[0],pts[1]),sections:[]};
+      } else if(from.col===to.col && Math.abs(from.row-to.row)===1) {
+        const down=from.row<to.row,first=down?from:to,second=down?to:from;
+        const x=(first.cx+second.cx)/2;
+        const pts=down?[{x,y:first.bottom+2},{x,y:second.top-2}]:[{x,y:second.top-2},{x,y:first.bottom+2}];
+        winner={points:pts,cost:distance(pts[0],pts[1]),sections:[]};
+      } else {
+        for(const sp of ports(from)) for(const ep of ports(to)) {
+          // 끝점을 향한 출발/도착 방향도 선이 너무 돌아가지 않도록 점수에 반영합니다.
+          for(const sourceNode of sp.neighbors) for(const targetNode of ep.neighbors) {
+            const route=dijkstra(sourceNode,targetNode);
+            if(!route) continue;
+            const attach=distance(sp.start,sp.access)+distance(sp.access,nodes[sourceNode])+
+              distance(nodes[targetNode],ep.access)+distance(ep.access,ep.start);
+            const total=route.cost+attach+((sp.side===ep.side)?5:0);
+            if(!winner||total<winner.cost) {
+              winner={cost:total,points:[sp.start,sp.access,nodes[sourceNode],...route.ids.slice(1).map(i=>nodes[i]),ep.access,ep.start],sections:route.ids};
+            }
+          }
+        }
+      }
+      if(!winner) continue;
+      const pts=winner.points.filter((p,i,arr)=>!i||distance(p,arr[i-1])>.5);
+      // 여러 구간이 한 직선에 있는 경우 불필요한 중간 점을 제거합니다.
+      const reduced=[];
+      for(const p of pts) {
+        while(reduced.length>1) {
+          const a=reduced[reduced.length-2],b=reduced[reduced.length-1];
+          if((Math.abs(a.x-b.x)<.2&&Math.abs(b.x-p.x)<.2) || (Math.abs(a.y-b.y)<.2&&Math.abs(b.y-p.y)<.2)) reduced.pop();
+          else break;
+        }
+        reduced.push(p);
+      }
+      routes.set(key(e.from,e.to),reduced);
+      for(let i=1;i<winner.sections.length;i++) {
+        const name=edgeName(winner.sections[i-1],winner.sections[i]);
+        used.set(name,(used.get(name)||0)+1);
+      }
+    }
+    routeCache={sizeKey,routes};
+    return routes;
+  }
+  function toPath(points) {
+    if(!points || points.length<2) return '';
+    const fmt=n=>Number(n.toFixed(2));
+    let d=`M ${fmt(points[0].x)} ${fmt(points[0].y)}`;
+    for(let i=1;i<points.length-1;i++) {
+      const prev=points[i-1],cur=points[i],next=points[i+1];
+      const d1=Math.hypot(cur.x-prev.x,cur.y-prev.y),d2=Math.hypot(next.x-cur.x,next.y-cur.y);
+      const radius=Math.min(5,d1*.3,d2*.3);
+      if(radius<.5) {d+=` L ${fmt(cur.x)} ${fmt(cur.y)}`;continue;}
+      const before={x:cur.x+(prev.x-cur.x)*radius/d1,y:cur.y+(prev.y-cur.y)*radius/d1};
+      const after={x:cur.x+(next.x-cur.x)*radius/d2,y:cur.y+(next.y-cur.y)*radius/d2};
+      d+=` L ${fmt(before.x)} ${fmt(before.y)} Q ${fmt(cur.x)} ${fmt(cur.y)} ${fmt(after.x)} ${fmt(after.y)}`;
+    }
+    const end=points[points.length-1];
+    return `${d} L ${fmt(end.x)} ${fmt(end.y)}`;
+  }
+  const svgNS='http://www.w3.org/2000/svg';
+  function svgEl(tag,attributes) {
+    const el=document.createElementNS(svgNS,tag);
+    Object.entries(attributes).forEach(([name,value])=>el.setAttribute(name,value));
+    return el;
   }
   function drawArrows() {
-    if (!round) return;
+    if(!round) return;
     const rect=board.getBoundingClientRect();
     svg.setAttribute('viewBox',`0 0 ${rect.width} ${rect.height}`);
     svg.replaceChildren();
-    const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
-    const makeMarker=(id,color)=>{
-      const marker=document.createElementNS('http://www.w3.org/2000/svg','marker');
-      marker.setAttribute('id',id); marker.setAttribute('markerWidth','5'); marker.setAttribute('markerHeight','5'); marker.setAttribute('refX','4'); marker.setAttribute('refY','2.5'); marker.setAttribute('orient','auto'); marker.setAttribute('markerUnits','strokeWidth');
-      const path=document.createElementNS('http://www.w3.org/2000/svg','path');
-      path.setAttribute('d','M0 0 L5 2.5 L0 5 Z'); path.setAttribute('fill',color);
-      marker.append(path); defs.append(marker);
-    };
-    makeMarker('arrowStandard','#179a75'); makeMarker('arrowFaded','#93bda7'); makeMarker('arrowStrong','#08775d');
+    const routes=routeLayout();
+    const defs=svgEl('defs',{});
+    [['standard','#0b8a65'],['faded','#729c89'],['strong','#066b50']].forEach(([name,color])=>{
+      const marker=svgEl('marker',{id:`fw-arrow-${name}`,viewBox:'0 0 9 9',markerWidth:9,markerHeight:9,refX:8,refY:4.5,orient:'auto',markerUnits:'userSpaceOnUse'});
+      marker.append(svgEl('path',{d:'M 1 1 L 8 4.5 L 1 8 Z',fill:color,stroke:'#fff','stroke-width':.9,'stroke-linejoin':'round'}));
+      defs.append(marker);
+    });
     svg.append(defs);
-    [...discovered].forEach((k,i)=>{
+    const all=[...discovered];
+    // 선택한 생물과 관련된 연결선을 맨 위에 그려 눈에 잘 띄게 합니다.
+    all.sort((a,b)=>Number(!!selectedId && (a.startsWith(selectedId+'>')||a.endsWith('>'+selectedId)))-Number(!!selectedId && (b.startsWith(selectedId+'>')||b.endsWith('>'+selectedId))));
+    all.forEach(k=>{
+      const points=routes.get(k);if(!points) return;
       const [from,to]=k.split('>');
-      const a=board.querySelector(`[data-id="${from}"]`),b=board.querySelector(`[data-id="${to}"]`);
-      if (!a || !b) return;
-      const {x1,y1,x2,y2}=edgePoints(a,b);
-      const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy) || 1;
-      const curve=(i%5-2)*7;
-      const mx=(x1+x2)/2 + (-dy/len)*curve, my=(y1+y2)/2+(dx/len)*curve;
-      const path=document.createElementNS('http://www.w3.org/2000/svg','path');
-      path.setAttribute('d',`M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`);
-      const active=selectedId&&(selectedId===from || selectedId===to);
-      const faded=selectedId&&!active;
-      path.setAttribute('class','link'+(faded?' faded':active?' strong':'')+(k===lastAdded?' just-added':''));
-      path.setAttribute('marker-end',`url(#${faded?'arrowFaded':active?'arrowStrong':'arrowStandard'})`);
-      svg.append(path);
+      const active=!!selectedId && (from===selectedId || to===selectedId);
+      const faded=!!selectedId && !active;
+      const state=faded?'faded':active?'strong':'standard';
+      const animation=k===lastAdded?' just-added':'';
+      const g=svgEl('g',{});
+      const d=toPath(points);
+      g.append(svgEl('path',{d,class:`link-halo ${state}${animation}`}));
+      g.append(svgEl('path',{d,class:`link ${state}${animation}`,'marker-end':`url(#fw-arrow-${state})`}));
+      svg.append(g);
     });
     lastAdded=null;
   }
