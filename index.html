@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#eff8f1" />
+  <meta name="description" content="랜덤으로 등장하는 생물 9종의 먹이 관계를 연결하는 생명과학 수업용 게임" />
+  <title>먹이그물 마스터 | 생명과학 탐구 게임</title>
+  <style>
+    :root { color-scheme: light; --ink:#173b32; --muted:#5b776e; --accent:#168f74; --dark:#116b59; --line:#cfdfd6; --leaf:#eef9ef; --paper:#fff; --warning:#ae4949; --shadow:0 13px 34px rgba(25,80,57,.07); }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust:100%; }
+    body { margin:0; font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif; background:radial-gradient(circle at 5% 0%,#e5f7ed 0%,transparent 36%),radial-gradient(circle at 95% 20%,#e6f5ff 0%,transparent 39%),#f6faf7; color:var(--ink); min-height:100vh; }
+    button { font:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
+    button:focus-visible { outline:3px solid #1b9d81; outline-offset:3px; }
+    .shell { width:min(100% - 30px,950px); margin:0 auto; padding:27px 0 45px; }
+    .masthead { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:21px; }
+    .eyebrow { font-weight:800; font-size:12px; letter-spacing:.16em; color:#388a75; margin:0 0 8px; }
+    h1 { font-size:clamp(28px,5vw,42px); margin:0; letter-spacing:-.06em; font-weight:900; line-height:1.19; }
+    .subtitle { margin:10px 0 0; font-size:14px; color:var(--muted); line-height:1.7; }
+    .class-tag { flex-shrink:0; border:1px solid #cce7d6; border-radius:100px; background:#e7f6ed; color:#35705b; padding:8px 12px; font-weight:800; font-size:12px; white-space:nowrap; }
+    .game-panel { border:1px solid #e3eee7; background:var(--paper); border-radius:24px; box-shadow:var(--shadow); padding:22px; }
+    .stats { display:grid; grid-template-columns:1fr auto; gap:12px; align-items:center; }
+    .section-small { color:var(--muted); font-size:12px; font-weight:750; margin:0 0 4px; }
+    .stat-number { font-size:24px; font-weight:900; letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
+    .score { background:#eaf8f1; color:#136952; border-radius:13px; padding:11px 15px; text-align:center; min-width:92px; }
+    .score-label { font-size:11px; font-weight:800; margin-bottom:2px; }
+    .score-value { font-size:22px; font-weight:900; font-variant-numeric:tabular-nums; }
+    .progress { height:9px; background:#e6f1e8; border-radius:20px; margin:15px 0 17px; overflow:hidden; }
+    .progress > div { background:linear-gradient(90deg,#70c9a3,#198d73); height:100%; width:0; border-radius:20px; transition:width .35s ease; }
+    .controls { display:grid; grid-template-columns:1.16fr 1fr 1fr; gap:9px; }
+    .btn { min-height:44px; padding:10px 13px; border:1px solid #d5e6dc; border-radius:13px; background:#f8fcf9; font-size:13px; color:#285a4c; font-weight:850; display:flex; justify-content:center; gap:7px; align-items:center; transition:transform .17s,background .17s,box-shadow .17s; }
+    .btn:active { transform:scale(.97); }
+    .btn:hover { background:#eaf7ee; }
+    .btn.primary { background:#147d66; color:#fff; border-color:#147d66; box-shadow:0 5px 11px rgba(12,120,94,.16); }
+    .btn.primary:hover { background:#0c6d58; }
+    .instruction { margin:17px 0 15px; border-radius:15px; background:#f3f8f5; border:1px solid #e5efe8; padding:13px 15px; display:flex; gap:10px; align-items:center; min-height:62px; }
+    .instruction .circle { width:33px; height:33px; border-radius:11px; flex:none; display:grid; place-items:center; background:#dff3e6; font-size:19px; }
+    .instruction p { margin:0; font-size:13px; line-height:1.7; color:#375f53; font-weight:650; }
+    .instruction strong { color:#07795f; }
+    .board { position:relative; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; border-radius:19px; overflow:hidden; isolation:isolate; padding:17px; min-height:505px; background: radial-gradient(circle at 14% 18%,rgba(255,255,255,.86) 0%,transparent 31%), radial-gradient(circle at 88% 76%,rgba(246,255,229,.9) 0%,transparent 32%), linear-gradient(155deg,#e9f6ec,#f3fae9 56%,#e6f4e2); border:1px solid #d7e9da; }
+    .board::after { content:""; pointer-events:none; position:absolute; inset:0; background-image:radial-gradient(#96bb9c 1px,transparent 1px); background-size:27px 27px; opacity:.12; z-index:0; }
+    .arrows { position:absolute; inset:0; width:100%; height:100%; z-index:1; overflow:visible; pointer-events:none; }
+    .species { min-width:0; min-height:137px; background:rgba(255,255,255,.96); border:2px solid #d9e9de; border-radius:17px; color:var(--ink); position:relative; z-index:2; display:flex; flex-direction:column; gap:5px; align-items:center; justify-content:center; padding:8px 4px; box-shadow:0 3px 0 rgba(79,127,87,.07),0 8px 16px rgba(38,107,70,.04); transition:border .18s, transform .2s, box-shadow .2s, opacity .2s; }
+    .species:hover { border-color:#8ecdad; transform:translateY(-1px); }
+    .species.selected { border-color:#0a9272; background:#edfff4; box-shadow:0 0 0 4px rgba(17,157,117,.18),0 8px 23px rgba(28,147,102,.1); transform:translateY(-2px); }
+    .species.related { border-color:#b7d6bb; }
+    .species.wrong { animation:shake .3s linear; border-color:#d66565; }
+    .species.hint-pulse { animation:hintpulse 1.25s ease-in-out 2; }
+    .species .emoji { font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif; display:block; font-size:clamp(38px,5.5vw,58px); line-height:1.15; filter:drop-shadow(0 5px 3px rgba(22,67,49,.09)); }
+    .species .name { text-align:center; font-size:clamp(12px,2.4vw,17px); font-weight:850; letter-spacing:-.065em; word-break:keep-all; line-height:1.3; }
+    .species .tag { color:#599381; font-size:10px; font-weight:700; }
+    .species .tag.done { background:#e3f5e8; color:#14715b; border-radius:30px; padding:2px 7px; }
+    .link { fill:none; stroke:#179a75; stroke-width:3.8; stroke-linecap:round; stroke-linejoin:round; opacity:.76; filter:drop-shadow(0 1px 1px rgba(255,255,255,.9)); transition:opacity .25s, stroke .25s; }
+    .link.faded { opacity:.16; stroke:#93bda7; }
+    .link.strong { opacity:1; stroke:#08775d; stroke-width:4.8; }
+    .link.just-added { stroke-dasharray:800; stroke-dashoffset:800; animation:draw .55s ease-out forwards; }
+    .notification { display:flex; align-items:center; gap:9px; margin:14px 0 2px; min-height:44px; padding:10px 13px; font-size:13px; color:#507568; background:#f8fcf9; border:1px solid #e7efe8; border-radius:12px; font-weight:650; line-height:1.5; }
+    .notification.success { color:#0b7359; background:#effaf2; border-color:#c5ead2; }
+    .notification.error { color:#a64141; background:#fff5f2; border-color:#f3d0c9; }
+    .notification.hint { color:#805e21; background:#fff9e9; border-color:#f6e7b7; }
+    .guide { margin-top:16px; border-left:3px solid #a5d8bd; padding:0 12px; font-size:12px; color:#5d756b; line-height:1.8; }
+    .guide b { color:#176951; }
+    .bottom { margin:16px 5px; font-size:12px; color:#7e9386; line-height:1.6; text-align:center; }
+    .modal-backdrop { position:fixed; inset:0; background:rgba(17,43,34,.6); z-index:10; display:grid; place-items:center; padding:20px; backdrop-filter:blur(6px); }
+    .modal-backdrop[hidden] { display:none; }
+    .modal { background:#fff; border-radius:24px; width:min(100%,420px); padding:34px 25px 26px; box-shadow:0 20px 80px rgba(0,0,0,.18); text-align:center; animation:pop .35s ease-out; }
+    .medal { font-size:57px; }
+    .modal h2 { font-size:27px; letter-spacing:-.06em; margin:9px 0 7px; }
+    .modal .desc { color:#658073; margin:0; font-size:14px; line-height:1.7; }
+    .big-result { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin:20px 0; }
+    .big-result > div { border:1px solid #e3eee6; padding:12px 5px; border-radius:13px; }
+    .big-result span { font-size:10px; display:block; color:#758d7d; margin-bottom:5px; }
+    .big-result strong { font-size:18px; }
+    .modal .btn { width:100%; }
+    .mini-action { margin-top:9px; background:transparent; border:0; color:#638071; padding:11px; font-size:13px; font-weight:700; }
+    @keyframes draw { to { stroke-dashoffset:0; } }
+    @keyframes shake { 25%{transform:translateX(-5px)} 50%{transform:translateX(5px)} 75%{transform:translateX(-3px)} }
+    @keyframes hintpulse { 50%{box-shadow:0 0 0 7px rgba(238,182,77,.3); border-color:#eab450} }
+    @keyframes pop { from{opacity:0;transform:translateY(22px) scale(.95)} to{opacity:1;transform:translateY(0) scale(1)} }
+    @media (max-width:600px) {
+      .shell { width:calc(100% - 20px); padding:18px 0 28px; }
+      .masthead { margin:0 4px 14px; }
+      .class-tag { display:none; }
+      .subtitle { font-size:12px; }
+      .game-panel { padding:13px; border-radius:19px; }
+      .stat-number { font-size:21px; }
+      .score { padding:9px 11px; }
+      .score-value { font-size:19px; }
+      .controls { gap:6px; }
+      .btn { min-height:45px; padding:8px 5px; font-size:12px; gap:4px; }
+      .instruction { padding:10px; margin:14px 0 12px; }
+      .instruction p { font-size:12px; }
+      .board { gap:10px; padding:11px; min-height:390px; border-radius:14px; }
+      .species { min-height:111px; border-radius:13px; padding:4px 2px; }
+      .species .emoji { font-size:41px; }
+      .species .name { font-size:12px; }
+      .species .tag { font-size:9px; }
+      .link { stroke-width:3; }
+      .guide { font-size:11px; }
+    }
+    @media (max-width:360px) {
+      .controls { grid-template-columns:1fr 1fr; }
+      #hintBtn { grid-column:span 2; }
+      .board { gap:7px; padding:8px; min-height:365px; }
+      .species { min-height:106px; }
+      .species .emoji { font-size:35px; }
+      .species .name { font-size:11px; }
+    }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important; transition-duration:.01ms!important; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <div>
+        <p class="eyebrow">LIFE SCIENCE · FOOD WEB</p>
+        <h1>🌿 먹이그물 마스터</h1>
+        <p class="subtitle">무작위로 등장한 생물 9종의 먹이 관계를 찾아 생태계의 먹이그물을 완성해 보세요.</p>
+      </div>
+      <span class="class-tag">고등학교 생명과학</span>
+    </header>
+
+    <section class="game-panel" aria-label="먹이그물 연결 게임">
+      <div class="stats">
+        <div>
+          <p class="section-small">먹이 관계 완성도 · 무작위 9종</p>
+          <div class="stat-number" id="progressText" aria-live="polite">0 / 0</div>
+        </div>
+        <div class="score" aria-label="현재 점수">
+          <div class="score-label">현재 점수</div>
+          <div class="score-value" id="scoreText">100</div>
+        </div>
+      </div>
+      <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="먹이 관계 완성 비율" id="progressTrack"><div id="progressBar"></div></div>
+      <div class="controls">
+        <button type="button" class="btn primary" id="randomBtn">🎲 랜덤 출제</button>
+        <button type="button" class="btn" id="resetBtn">↻ 다시 연결</button>
+        <button type="button" class="btn" id="hintBtn">💡 힌트 (-8점)</button>
+      </div>
+      <div class="instruction" id="instruction">
+        <span class="circle" aria-hidden="true">👆</span>
+        <p id="instructionText">먼저 <strong>먹이가 되는 생물</strong>을 터치한 뒤, <strong>그 먹이를 먹는 생물</strong>을 터치하세요.</p>
+      </div>
+      <div class="board" id="board" aria-label="생물 9종 선택 영역">
+        <svg class="arrows" id="arrowLayer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="notification" id="feedback" role="status" aria-live="polite">🧩 같은 생태계의 생물들이 등장합니다. 정답 관계를 하나씩 연결해 보세요.</div>
+      <div class="guide"><b>화살표의 방향:</b> 먹이가 되는 생물 → 이를 먹는 생물<br>생물은 총 26종의 목록에서 매번 새로 선정됩니다. 각 문제는 수업용으로 단순화한 대표적인 먹이 관계를 기준으로 합니다.</div>
+    </section>
+    <p class="bottom">별도의 로그인이나 설치 없이 사용할 수 있는 수업용 게임 · 새로고침하면 새로운 문제가 출제됩니다.</p>
+  </main>
+
+  <div class="modal-backdrop" id="resultModal" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+      <div class="medal" id="resultMedal">🏆</div>
+      <h2 id="resultTitle">먹이그물 완성!</h2>
+      <p class="desc" id="resultMessage">9종의 생물이 연결되었습니다.</p>
+      <div class="big-result">
+        <div><span>획득 점수</span><strong id="finalScore">100점</strong></div>
+        <div><span>완성 관계</span><strong id="finalEdges">0개</strong></div>
+        <div><span>등급</span><strong id="finalGrade">S</strong></div>
+      </div>
+      <button type="button" class="btn primary" id="nextRoundBtn">🎲 새로운 9종 도전하기</button>
+      <button type="button" class="mini-action" id="closeModalBtn">완성된 먹이그물 보기</button>
+    </section>
+  </div>
+
+<script>
+(() => {
+  'use strict';
+
+  // 모든 관계는 먹이 -> 먹는 생물 순서로 표시됩니다.
+  // 각 생물의 eats 목록은 수업용 모형에 포함된 대표 먹이만 뜻합니다.
+  const species = [
+    // 생산자 6종
+    { id:'foxtail', name:'강아지풀', emoji:'🌾', group:'producer', eats:[] },
+    { id:'clover', name:'토끼풀', emoji:'☘️', group:'producer', eats:[] },
+    { id:'dandelion', name:'민들레', emoji:'🌼', group:'producer', eats:[] },
+    { id:'oak', name:'참나무', emoji:'🌳', group:'producer', eats:[] },
+    { id:'plantain', name:'질경이', emoji:'🌱', group:'producer', eats:[] },
+    { id:'silvergrass', name:'억새', emoji:'🌿', group:'producer', eats:[] },
+    // 1차 소비자 7종
+    { id:'grasshopper', name:'메뚜기', emoji:'🦗', group:'primary', eats:['foxtail','clover','dandelion','plantain','silvergrass'] },
+    { id:'leafbeetle', name:'잎벌레', emoji:'🪲', group:'primary', eats:['clover','dandelion','oak','plantain'] },
+    { id:'aphid', name:'진딧물', emoji:'🐛', group:'primary', eats:['foxtail','clover','dandelion','oak','plantain','silvergrass'] },
+    { id:'fieldmouse', name:'들쥐', emoji:'🐭', group:'primary', eats:['foxtail','clover','dandelion','oak','plantain','silvergrass'] },
+    { id:'hare', name:'멧토끼', emoji:'🐇', group:'primary', eats:['foxtail','clover','dandelion','plantain','silvergrass'] },
+    { id:'snail', name:'달팽이', emoji:'🐌', group:'primary', eats:['foxtail','clover','dandelion','oak','plantain'] },
+    { id:'caterpillar', name:'나방 애벌레', emoji:'🐛', group:'primary', eats:['clover','dandelion','oak','plantain','silvergrass'] },
+    // 작은 포식자 7종
+    { id:'frog', name:'참개구리', emoji:'🐸', group:'secondary', eats:['grasshopper','leafbeetle','aphid','caterpillar','snail'] },
+    { id:'treefrog', name:'청개구리', emoji:'🐸', group:'secondary', eats:['grasshopper','leafbeetle','aphid','caterpillar'] },
+    { id:'mantis', name:'사마귀', emoji:'🦗', group:'secondary', eats:['grasshopper','leafbeetle','aphid','caterpillar'] },
+    { id:'tit', name:'박새', emoji:'🐦', group:'secondary', eats:['grasshopper','leafbeetle','aphid','caterpillar'] },
+    { id:'lizard', name:'도마뱀', emoji:'🦎', group:'secondary', eats:['grasshopper','leafbeetle','aphid','caterpillar'] },
+    { id:'snake', name:'누룩뱀', emoji:'🐍', group:'secondary', eats:['fieldmouse','frog','treefrog','lizard','tit'] },
+    { id:'spider', name:'거미', emoji:'🕷️', group:'secondary', eats:['grasshopper','leafbeetle','aphid','caterpillar'] },
+    // 상위 포식자 6종
+    { id:'buzzard', name:'말똥가리', emoji:'🦅', group:'apex', eats:['fieldmouse','hare','frog','treefrog','lizard','tit','snake'] },
+    { id:'wildcat', name:'삵', emoji:'🐈', group:'apex', eats:['fieldmouse','hare','frog','treefrog','lizard','tit','snake'] },
+    { id:'owl', name:'올빼미', emoji:'🦉', group:'apex', eats:['fieldmouse','frog','treefrog','lizard','tit','snake'] },
+    { id:'kestrel', name:'황조롱이', emoji:'🦅', group:'apex', eats:['fieldmouse','grasshopper','lizard','tit'] },
+    { id:'weasel', name:'족제비', emoji:'🐾', group:'apex', eats:['fieldmouse','hare','frog','lizard','tit'] },
+    { id:'fox', name:'여우', emoji:'🦊', group:'apex', eats:['fieldmouse','hare','frog','lizard','tit','grasshopper'] }
+  ];
+  const byId = new Map(species.map(s => [s.id,s]));
+  const groups = ['producer','primary','secondary','apex'];
+  const sizes = { producer:2, primary:3, secondary:2, apex:2 };
+  const $ = id => document.getElementById(id);
+  const board = $('board');
+  const svg = $('arrowLayer');
+  const feedback = $('feedback');
+  const selectionText = $('instructionText');
+  let round = null;
+  let selectedId = null;
+  let discovered = new Set();
+  let wrongCount = 0;
+  let hints = 0;
+  let highlightedHint = [];
+  let lastAdded = null;
+  let startedAt = 0;
+
+  function shuffled(items) {
+    const arr = [...items];
+    for (let i=arr.length-1; i>0; i--) {
+      const j = Math.floor(Math.random() * (i+1));
+      [arr[i],arr[j]] = [arr[j],arr[i]];
+    }
+    return arr;
+  }
+  function key(a,b) { return `${a}>${b}`; }
+  function connectable(nodes, edges) {
+    if (edges.length < 11 || edges.length > 22) return false;
+    const degree = new Map(nodes.map(n => [n.id,0]));
+    const inFrom = new Map(nodes.map(n => [n.id,[]]));
+    const adjacent = new Map(nodes.map(n => [n.id,[]]));
+    for (const e of edges) {
+      degree.set(e.from,degree.get(e.from)+1);
+      degree.set(e.to,degree.get(e.to)+1);
+      inFrom.get(e.to).push(e.from);
+      adjacent.get(e.from).push(e.to);
+      adjacent.get(e.to).push(e.from);
+    }
+    if ([...degree.values()].some(n => n === 0)) return false;
+    if (nodes.some(n => n.group !== 'producer' && !inFrom.get(n.id).length)) return false;
+    if (nodes.some(n => n.group === 'secondary' && !inFrom.get(n.id).some(id => byId.get(id).group === 'primary'))) return false;
+    const visited = new Set([nodes[0].id]);
+    const stack = [nodes[0].id];
+    while (stack.length) for (const neighbor of adjacent.get(stack.pop())) if (!visited.has(neighbor)) { visited.add(neighbor); stack.push(neighbor); }
+    return visited.size === nodes.length;
+  }
+  function makeRandomRound() {
+    for (let attempt=0; attempt<10000; attempt++) {
+      const cards = groups.flatMap(g => shuffled(species.filter(s => s.group === g)).slice(0,sizes[g]));
+      const ids = new Set(cards.map(n => n.id));
+      const edges = cards.flatMap(consumer => consumer.eats.filter(id => ids.has(id)).map(food => ({from:food,to:consumer.id})));
+      if (connectable(cards,edges) && (!round || cards.map(x=>x.id).sort().join('|') !== round.cards.map(x=>x.id).sort().join('|'))) {
+        return {cards:shuffled(cards), edges};
+      }
+    }
+    throw new Error('먹이그물 생성에 실패했습니다.');
+  }
+  function score() { return Math.max(0,100 - wrongCount*3 - hints*8); }
+  function notify(message, kind='') {
+    feedback.className=`notification ${kind}`;
+    feedback.textContent=message;
+  }
+  function progress() {
+    const total=round.edges.length, done=discovered.size;
+    $('progressText').textContent=`${done} / ${total}`;
+    $('scoreText').textContent=score();
+    $('progressBar').style.width=`${Math.round(done/total*100)}%`;
+    $('progressTrack').setAttribute('aria-valuenow',Math.round(done/total*100));
+  }
+  function clearHint() {
+    highlightedHint=[];
+    board.querySelectorAll('.species').forEach(btn=>btn.classList.remove('hint-pulse'));
+  }
+  function updateSelection() {
+    board.querySelectorAll('.species').forEach(button => {
+      const id=button.dataset.id;
+      const participates=[...discovered].some(k => k.startsWith(id+'>') || k.endsWith('>'+id));
+      button.classList.toggle('selected',selectedId===id);
+      button.classList.toggle('related',participates && selectedId!==id);
+      button.setAttribute('aria-pressed',selectedId===id?'true':'false');
+      const tag=button.querySelector('.tag');
+      const count=[...discovered].filter(k=>k.startsWith(id+'>') || k.endsWith('>'+id)).length;
+      tag.textContent=count?`연결 ${count}개`:'터치하여 선택';
+      tag.classList.toggle('done',count>0);
+    });
+    if (selectedId) {
+      selectionText.innerHTML=`<strong>${escapeHtml(byId.get(selectedId).name)}</strong>을(를) 먹는 생물을 선택하세요. <span style="color:#6b8b7b">(같은 카드를 누르면 취소)</span>`;
+    } else {
+      selectionText.innerHTML='먼저 <strong>먹이가 되는 생물</strong>을 터치한 뒤, <strong>그 먹이를 먹는 생물</strong>을 터치하세요.';
+    }
+    drawArrows();
+  }
+  function escapeHtml(str) { return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function renderBoard() {
+    board.querySelectorAll('.species').forEach(node=>node.remove());
+    for (const s of round.cards) {
+      const btn=document.createElement('button');
+      btn.type='button';
+      btn.className='species';
+      btn.dataset.id=s.id;
+      btn.setAttribute('aria-label',s.name);
+      btn.setAttribute('aria-pressed','false');
+      const emoji=document.createElement('span'); emoji.className='emoji'; emoji.textContent=s.emoji; emoji.setAttribute('aria-hidden','true');
+      const name=document.createElement('span'); name.className='name'; name.textContent=s.name;
+      const tag=document.createElement('span'); tag.className='tag'; tag.textContent='터치하여 선택';
+      btn.append(emoji,name,tag);
+      btn.addEventListener('click',()=>onSpeciesClick(s.id));
+      board.append(btn);
+    }
+    updateSelection();
+  }
+  function newRound() {
+    $('resultModal').hidden=true;
+    round=makeRandomRound();
+    selectedId=null;
+    discovered=new Set(); wrongCount=0; hints=0; lastAdded=null; startedAt=Date.now();
+    clearHint();
+    renderBoard();
+    progress();
+    notify(`🎲 새로운 생물 9종 등장! ${round.edges.length}개의 대표적인 먹이 관계를 완성해 보세요.`);
+  }
+  function resetRound() {
+    $('resultModal').hidden=true;
+    selectedId=null; discovered=new Set(); wrongCount=0; hints=0; lastAdded=null; startedAt=Date.now();
+    clearHint(); updateSelection(); progress();
+    notify('↻ 같은 생물 9종으로 다시 시작합니다.');
+  }
+  function onSpeciesClick(id) {
+    if (discovered.size===round.edges.length) return;
+    clearHint();
+    if (!selectedId) {
+      selectedId=id; notify(`👆 ${byId.get(id).name}을(를) 먹는 생물을 선택하세요.`); updateSelection(); return;
+    }
+    if (selectedId===id) { selectedId=null; notify('선택을 취소했습니다. 새로운 먹이를 골라 주세요.'); updateSelection(); return; }
+    const k=key(selectedId,id);
+    if (discovered.has(k)) {
+      notify('✅ 이미 완성한 먹이 관계입니다. 다른 생물을 연결해 보세요.');
+      selectedId=null; updateSelection(); return;
+    }
+    if (round.edges.some(e=>key(e.from,e.to)===k)) {
+      discovered.add(k); lastAdded=k;
+      notify(`✅ 정답! ${byId.get(selectedId).name} → ${byId.get(id).name}`,'success');
+      selectedId=null; updateSelection(); progress();
+      if (discovered.size===round.edges.length) window.setTimeout(showResult,650);
+    } else {
+      wrongCount++;
+      const other=board.querySelector(`[data-id="${id}"]`);
+      other.classList.remove('wrong'); void other.offsetWidth; other.classList.add('wrong');
+      window.setTimeout(()=>other.classList.remove('wrong'),350);
+      if (round.edges.some(e=>key(e.from,e.to)===key(id,selectedId))) {
+        notify('❌ 화살표 방향이 반대입니다! 먹이가 되는 생물부터 선택해 주세요. (-3점)','error');
+      } else {
+        notify('❌ 이 모형에서 정한 대표 먹이 관계가 아닙니다. 다른 생물을 선택해 보세요. (-3점)','error');
+      }
+      progress();
+    }
+  }
+  function revealHint() {
+    if (!round || discovered.size===round.edges.length) return;
+    const notFound=round.edges.filter(e=>!discovered.has(key(e.from,e.to)));
+    let edge;
+    if (selectedId) edge=notFound.find(e=>e.from===selectedId);
+    edge=edge || shuffled(notFound)[0];
+    hints++; progress();
+    clearHint();
+    highlightedHint=[edge.from,edge.to];
+    highlightedHint.forEach(id=>{
+      const b=board.querySelector(`[data-id="${id}"]`);
+      if (b) { void b.offsetWidth; b.classList.add('hint-pulse'); }
+    });
+    notify(`💡 힌트: ‘${byId.get(edge.from).name}’ → ‘${byId.get(edge.to).name}’ 관계를 연결해 보세요. (-8점)`,'hint');
+    selectedId=null;
+    updateSelection();
+  }
+  function edgePoints(a,b) {
+    const boardRect=board.getBoundingClientRect();
+    const r1=a.getBoundingClientRect(), r2=b.getBoundingClientRect();
+    const p1={x:r1.left-boardRect.left+r1.width/2,y:r1.top-boardRect.top+r1.height/2};
+    const p2={x:r2.left-boardRect.left+r2.width/2,y:r2.top-boardRect.top+r2.height/2};
+    const dx=p2.x-p1.x, dy=p2.y-p1.y;
+    const fit=(w,h)=>Math.min((w/2+3)/Math.max(Math.abs(dx),.01),(h/2+3)/Math.max(Math.abs(dy),.01));
+    const t1=fit(r1.width,r1.height), t2=fit(r2.width,r2.height);
+    return {x1:p1.x+dx*t1,y1:p1.y+dy*t1,x2:p2.x-dx*t2,y2:p2.y-dy*t2};
+  }
+  function drawArrows() {
+    if (!round) return;
+    const rect=board.getBoundingClientRect();
+    svg.setAttribute('viewBox',`0 0 ${rect.width} ${rect.height}`);
+    svg.replaceChildren();
+    const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
+    const makeMarker=(id,color)=>{
+      const marker=document.createElementNS('http://www.w3.org/2000/svg','marker');
+      marker.setAttribute('id',id); marker.setAttribute('markerWidth','5'); marker.setAttribute('markerHeight','5'); marker.setAttribute('refX','4'); marker.setAttribute('refY','2.5'); marker.setAttribute('orient','auto'); marker.setAttribute('markerUnits','strokeWidth');
+      const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d','M0 0 L5 2.5 L0 5 Z'); path.setAttribute('fill',color);
+      marker.append(path); defs.append(marker);
+    };
+    makeMarker('arrowStandard','#179a75'); makeMarker('arrowFaded','#93bda7'); makeMarker('arrowStrong','#08775d');
+    svg.append(defs);
+    [...discovered].forEach((k,i)=>{
+      const [from,to]=k.split('>');
+      const a=board.querySelector(`[data-id="${from}"]`),b=board.querySelector(`[data-id="${to}"]`);
+      if (!a || !b) return;
+      const {x1,y1,x2,y2}=edgePoints(a,b);
+      const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy) || 1;
+      const curve=(i%5-2)*7;
+      const mx=(x1+x2)/2 + (-dy/len)*curve, my=(y1+y2)/2+(dx/len)*curve;
+      const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d',`M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`);
+      const active=selectedId&&(selectedId===from || selectedId===to);
+      const faded=selectedId&&!active;
+      path.setAttribute('class','link'+(faded?' faded':active?' strong':'')+(k===lastAdded?' just-added':''));
+      path.setAttribute('marker-end',`url(#${faded?'arrowFaded':active?'arrowStrong':'arrowStandard'})`);
+      svg.append(path);
+    });
+    lastAdded=null;
+  }
+  function showResult() {
+    if (!round || discovered.size!==round.edges.length) return;
+    const total=score();
+    const grade=total>=90?'S':total>=75?'A':total>=55?'B':'C';
+    $('resultMedal').textContent=grade==='S'?'🏆':grade==='A'?'🥇':grade==='B'?'🥈':'🌱';
+    $('resultTitle').textContent='먹이그물 완성!';
+    $('resultMessage').textContent=`생물 9종의 먹이 관계를 모두 연결했습니다. 틀린 시도 ${wrongCount}회 · 힌트 ${hints}회`;
+    $('finalScore').textContent=`${total}점`;
+    $('finalEdges').textContent=`${round.edges.length}개`;
+    $('finalGrade').textContent=grade;
+    $('resultModal').hidden=false;
+    $('nextRoundBtn').focus();
+  }
+  $('randomBtn').addEventListener('click',newRound);
+  $('resetBtn').addEventListener('click',resetRound);
+  $('hintBtn').addEventListener('click',revealHint);
+  $('nextRoundBtn').addEventListener('click',newRound);
+  $('closeModalBtn').addEventListener('click',()=>{$('resultModal').hidden=true; $('randomBtn').focus();});
+  window.addEventListener('resize',()=>window.requestAnimationFrame(drawArrows));
+  if (typeof ResizeObserver !== 'undefined') new ResizeObserver(()=>window.requestAnimationFrame(drawArrows)).observe(board);
+  newRound();
+})();
+</script>
+</body>
+</html>
